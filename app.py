@@ -52,25 +52,23 @@ def chat():
             "details": str(e)
         }), 502
 
-    if response.status_code != 200:
-    try:
-        result = response.json()
-    except ValueError:
-        result = {
-            "error": "AI provider returned a non-JSON error",
-            "status_code": response.status_code
-        }
+        if response.status_code != 200:
+        try:
+            result = response.json()
+        except ValueError:
+            result = {
+                "error": "AI provider returned a non-JSON error",
+                "status_code": response.status_code
+            }
 
-    return jsonify(result), response.status_code
+        return jsonify(result), response.status_code
 
-result = response.json()
+    result = response.json()
 
-return jsonify({
-    "response": result["choices"][0]["message"]["content"]
-})
+    return jsonify({
+        "response": result["choices"][0]["message"]["content"]
+    })
 
-"response": result["choices"][0]["message"]["content"]
-})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
