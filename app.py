@@ -44,7 +44,7 @@ def chat():
         timeout=120
     )
 
-        result = response.json()
+    result = response.json()
 
     if response.status_code != 200:
         return jsonify(result), response.status_code
