@@ -28,6 +28,7 @@ def chat():
     if not api_key:
         return jsonify({"error": "PROFUNDO_API_KEY is not configured"}), 500
 
+    try:
     response = requests.post(
         PROFUNDO_URL,
         headers={
@@ -37,18 +38,24 @@ def chat():
         json={
             "model": model,
             "messages": [
-    {
-        "role": "system",
-        "content": system_prompt
-    },
-    {
-        "role": "user",
-        "content": text
-    }
-]
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
         },
         timeout=120
     )
+
+except requests.exceptions.RequestException as e:
+    return jsonify({
+        "error": "Failed to connect to AI provider",
+        "details": str(e)
+    }), 502
 
     result = response.json()
 
