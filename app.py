@@ -4,7 +4,7 @@ import requests
 
 app = Flask(__name__)
 
-PROFUNDO_URL = "https://api.profundoai.com/v1/chat/completions"
+PROFUNDO_URL = "https://api.profundoai.com/v1/THIS_DOES_NOT_EXIST"
 
 
 @app.route("/chat", methods=["POST"])
