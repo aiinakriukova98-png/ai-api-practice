@@ -7,11 +7,6 @@ app = Flask(__name__)
 PROFUNDO_URL = "https://api.profundoai.com/v1/chat/completions"
 
 
-@app.route("/")
-def home():
-    return "AI API is working!"
-
-
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
@@ -29,33 +24,33 @@ def chat():
         return jsonify({"error": "PROFUNDO_API_KEY is not configured"}), 500
 
     try:
-    response = requests.post(
-        PROFUNDO_URL,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": model,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ]
-        },
-        timeout=120
-    )
+        response = requests.post(
+            PROFUNDO_URL,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": model,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_prompt
+                    },
+                    {
+                        "role": "user",
+                        "content": text
+                    }
+                ]
+            },
+            timeout=120
+        )
 
-except requests.exceptions.RequestException as e:
-    return jsonify({
-        "error": "Failed to connect to AI provider",
-        "details": str(e)
-    }), 502
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            "error": "Failed to connect to AI provider",
+            "details": str(e)
+        }), 502
 
     result = response.json()
 
