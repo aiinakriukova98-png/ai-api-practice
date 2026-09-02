@@ -4,7 +4,7 @@ import requests
 
 app = Flask(__name__)
 
-PROFUNDO_URL = "https://api.profundoai.com/v1/THIS_DOES_NOT_EXIST"
+PROFUNDO_URL = "https://api.profundoai.com/v1/chat/completions"
 
 
 @app.route("/chat", methods=["POST"])
@@ -52,15 +52,22 @@ def chat():
             "details": str(e)
         }), 502
 
-    result = response.json()
-
     if response.status_code != 200:
-        return jsonify(result), response.status_code
+    try:
+        result = response.json()
+    except ValueError:
+        result = {
+            "error": "AI provider returned a non-JSON error",
+            "status_code": response.status_code
+        }
 
-    return jsonify({
-        "response": result["choices"][0]["message"]["content"]
-    })
+    return jsonify(result), response.status_code
 
+result = response.json()
+
+return jsonify({
+    "response": result["choices"][0]["message"]["content"]
+})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
