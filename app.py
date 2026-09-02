@@ -7,6 +7,11 @@ app = Flask(__name__)
 PROFUNDO_URL = "https://api.profundoai.com/v1/chat/completions"
 
 
+@app.route("/")
+def home():
+    return "AI API is working!"
+
+
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
@@ -21,7 +26,9 @@ def chat():
     api_key = os.environ.get("PROFUNDO_API_KEY")
 
     if not api_key:
-        return jsonify({"error": "PROFUNDO_API_KEY is not configured"}), 500
+        return jsonify({
+            "error": "PROFUNDO_API_KEY is not configured"
+        }), 500
 
     try:
         response = requests.post(
@@ -52,7 +59,7 @@ def chat():
             "details": str(e)
         }), 502
 
-        if response.status_code != 200:
+    if response.status_code != 200:
         try:
             result = response.json()
         except ValueError:
