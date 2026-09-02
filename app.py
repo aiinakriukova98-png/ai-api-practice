@@ -17,6 +17,7 @@ def chat():
     data = request.get_json()
 
     text = data.get("text", "")
+    system_prompt = data.get("system", "Ты полезный ассистент.")
 
     if not text:
         return jsonify({"error": "No text provided"}), 400
@@ -35,11 +36,15 @@ def chat():
         json={
             "model": "gemini-3.1-pro",
             "messages": [
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ]
+    {
+        "role": "system",
+        "content": system_prompt
+    },
+    {
+        "role": "user",
+        "content": text
+    }
+]
         },
         timeout=120
     )
