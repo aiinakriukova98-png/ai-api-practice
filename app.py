@@ -1,10 +1,12 @@
+
 from flask import Flask, request, jsonify
 import os
 import requests
 
 app = Flask(__name__)
 
-PROFUNDO_URL = "https://api.profundoai.com/v1/chat/completions"
+API_URL = os.environ.get("API_URL", "")
+API_KEY = os.environ.get("API_KEY", "")
 
 
 @app.route("/")
@@ -14,27 +16,28 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
 
     text = data.get("text", "")
-    system_prompt = data.get("system", "Ты полезный ассистент.")
-    model = data.get("model", "gemini-3.1-pro")
+    system_prompt = data.get(
+        "system",
+        "Ты полезный ассистент."
+    )
+    model = data.get("model", "")
 
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
-    api_key = os.environ.get("PROFUNDO_API_KEY")
-
-    if not api_key:
+    if not API_URL or not API_KEY:
         return jsonify({
-            "error": "PROFUNDO_API_KEY is not configured"
+            "error": "API configuration is missing"
         }), 500
 
     try:
         response = requests.post(
-            PROFUNDO_URL,
+            API_URL,
             headers={
-                "Authorization": f"Bearer {api_key}",
+                "Authorization": f"Bearer {API_KEY}",
                 "Content-Type": "application/json"
             },
             json={
@@ -53,28 +56,22 @@ def chat():
             timeout=120
         )
 
-    except requests.exceptions.RequestException as e:
+        response.raise_for_status()
+        result = response.json()
+
         return jsonify({
-            "error": "Failed to connect to AI provider",
-            "details": str(e)
+            "response": result["choices"][0]["message"]["content"]
+        })
+
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Failed to connect to AI provider"
         }), 502
 
-    if response.status_code != 200:
-        try:
-            result = response.json()
-        except ValueError:
-            result = {
-                "error": "AI provider returned a non-JSON error",
-                "status_code": response.status_code
-            }
-
-        return jsonify(result), response.status_code
-
-    result = response.json()
-
-    return jsonify({
-        "response": result["choices"][0]["message"]["content"]
-    })
+    except (ValueError, KeyError, IndexError, TypeError):
+        return jsonify({
+            "error": "Invalid response from AI provider"
+        }), 502
 
 
 if __name__ == "__main__":
